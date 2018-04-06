@@ -168,7 +168,6 @@ unsigned char ucGetIndice(unsigned char* ucArray, unsigned char ucTaille_Array)
 
 void vStartScreen(void)
 {
-  UC i;
   vClearGLcd(0);
 
   vPutBMPGLcd((unsigned char*)BestFlag);
@@ -176,16 +175,16 @@ void vStartScreen(void)
 
 void vInfoScreen(void)
 {
-  unsigned char ligne1[] = {"      LAB4-416.     "};
-  unsigned char ligne3[] = {"   Cegep Limoilou   "};
-  unsigned char ligne4[] = {"        2018        "};
+  unsigned char ligne1[] = {"        PONG        "};
+  unsigned char ligne3[] = {" Pascal-Emmanuel L. "};
+  unsigned char ligne4[] = {"Charles Lesvesque-M."};
   unsigned char ligne6[] = {"   Samuel Martel.   "};
   
   vClearGLcd(0);
   vPutStringGLcd(ligne1, 0, 5);
   vPutStringGLcd(ligne3, 2, 5);
-  vPutStringGLcd(ligne4, 3, 5);
-  vPutStringGLcd(ligne6, 5, 5);
+  vPutStringGLcd(ligne4, 4, 5);
+  vPutStringGLcd(ligne6, 6, 5);
 }
 
 void vScrollScreenUp(UC ucNombreDePage)  // ucNombreDePage [1~8]
