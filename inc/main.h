@@ -175,6 +175,9 @@
 
 /* USER CODE BEGIN Private defines */
 
+    
+#define STATE_B1 HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

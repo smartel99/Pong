@@ -57,10 +57,13 @@
 #include "IO_BUS.h"
 #include "Physics.h"
 #include "LIS3DSH.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
+
+RNG_HandleTypeDef hrng;
 
 SPI_HandleTypeDef hspi1;
 
@@ -77,6 +80,7 @@ static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_RNG_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -95,7 +99,18 @@ static void MX_USART2_UART_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  float fBall_Pos_X = 63;
+  float fBall_Pos_Y = 32;
+  
+  float fBall_Vec_X = 0;
+  float fBall_Vec_Y = 0;
+  
+  uint8_t ucBall_Status = BALL_OK;
+  
+  uint8_t ucScore_Joueur_Droite = 0;
+  uint8_t ucScore_Joueur_Gauche = 0;
+  
+  int8_t c_a_Score[9];
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -120,6 +135,7 @@ int main(void)
   MX_SPI1_Init();
   MX_USART2_UART_Init();
   MX_USB_DEVICE_Init();
+  MX_RNG_Init();
   /* USER CODE BEGIN 2 */
   vInitGLcd();
   vLIS3DSHEcrire(LIS3DSH_Reg_Ctrl_4, 0x63);
@@ -132,6 +148,11 @@ int main(void)
   
   HAL_Delay(1000);
   vClearGLcd(0x00);
+  
+  vDrawCircleGLcd((uint8_t)fBall_Pos_X, (uint8_t) fBall_Pos_Y, 3);
+  
+  vStartVector(&fBall_Vec_X, &fBall_Vec_Y);
+  HAL_UART_Transmit(&huart2, (uint8_t*) "\n\r", 2, 100);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -142,7 +163,29 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-
+    vRemoveCircleGLcd((uint8_t)fBall_Pos_X, (uint8_t)fBall_Pos_Y, 3);
+    
+    do {
+      fBall_Pos_X += fBall_Vec_X;
+      fBall_Pos_Y += fBall_Vec_Y;
+      
+      ucBall_Status = ucCheckIsBallOK(&fBall_Pos_X, &fBall_Pos_Y, &fBall_Vec_X, &fBall_Vec_Y);
+      if((ucBall_Status == BUT_J_DROIT) || (ucBall_Status == BUT_J_GAUCHE))
+      {
+        if(ucBall_Status == BUT_J_DROIT)
+          ucScore_Joueur_Droite++;
+        else if(ucBall_Status == BUT_J_GAUCHE)
+          ucScore_Joueur_Gauche++;
+        
+        sprintf(c_a_Score, "%d %d\r", ucScore_Joueur_Droite, ucScore_Joueur_Gauche);
+        HAL_UART_Transmit(&huart2, (uint8_t*) &c_a_Score, 9, 100);
+        HAL_Delay(1000);
+      }
+    } while(ucBall_Status != BALL_OK);
+    ucBall_Status = BALL_NOT_TESTED;
+    
+    vDrawCircleGLcd((uint8_t)fBall_Pos_X, (uint8_t) fBall_Pos_Y, 3);
+    HAL_Delay(35);
   }
   /* USER CODE END 3 */
 
@@ -219,6 +262,18 @@ static void MX_I2C1_Init(void)
   hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
   hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
   if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+}
+
+/* RNG init function */
+static void MX_RNG_Init(void)
+{
+
+  hrng.Instance = RNG;
+  if (HAL_RNG_Init(&hrng) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
