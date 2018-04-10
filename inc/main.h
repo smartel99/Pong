@@ -174,10 +174,9 @@
 /* #define USE_FULL_ASSERT    1U */
 
 /* USER CODE BEGIN Private defines */
-
-    
 #define STATE_B1 HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)
 
+#define PADDLE_DEFAULT_Y 24
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

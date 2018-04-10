@@ -54,7 +54,7 @@ void vStartVector(float *Balle_X, float *Balle_Y)
   if(rand()%2) *Balle_X *= -1;
 }
 
-unsigned char ucCheckIsBallOK(float *X, float *Y, float *Vec_X, float *Vec_Y)
+unsigned char ucCheckIsBallOK(float *X, float *Y, float *Paddle_L, float *Paddle_R, float *P_L_Vec, float *P_R_Vec, float *Vec_X, float *Vec_Y)
 {
   if(*X<3.0)
   {
@@ -70,18 +70,59 @@ unsigned char ucCheckIsBallOK(float *X, float *Y, float *Vec_X, float *Vec_Y)
     vStartVector(Vec_X, Vec_Y);
     return BUT_J_GAUCHE;
   }
+  else if((*X >= 6) && (*X <= 7))
+  {
+    if((*Y>=*Paddle_L-3) && (*Y <= *Paddle_L + PADDLE_SIZE+3))
+      vNewVector(Vec_X, Vec_Y, PADDLE_VEC_X, *P_L_Vec);
+    return HIT_PAD_L;
+  }
+  else if((*X >= 121) && (*X <= 122))
+  {
+    if((*Y>=*Paddle_R-3) && (*Y <= *Paddle_R + PADDLE_SIZE+3))
+      vNewVector(Vec_X, Vec_Y, PADDLE_VEC_X, *P_R_Vec);
+    return HIT_PAD_R;
+  }
   else if(*Y<=2.0) // ROOF
   {
     *Y = 3.0;
     vNewVector(Vec_X, Vec_Y, MUR_HAUT_VEC_X, MUR_HAUT_VEC_Y);
     return HIT_ROOF;
   }
-  else if(*Y>=61.0)
+  else if(*Y>=61.0) // Floor
   {
     *Y = 60.0;
     vNewVector(Vec_X, Vec_Y, MUR_BAS_VEC_X, MUR_BAS_VEC_Y);
     return HIT_FLOOR;
   }
+
   else
     return BALL_OK;
+}
+
+void vAI(float Balle_X, float Balle_Y, float Pos_Y, float *Vecteur, unsigned char pos, unsigned char sense)
+{
+  if(sense == 'G')
+  {
+    if(Balle_X < pos)
+    {
+      if(Balle_Y < (Pos_Y + 8))
+        *Vecteur = -1.0f;
+      else if(Balle_Y > (Pos_Y +8))
+        *Vecteur = 1.0f;
+      else 
+        *Vecteur = 0;
+    }
+  }
+  else 
+  {
+    if(Balle_X > pos)
+    {
+      if(Balle_Y < (Pos_Y + 8))
+        *Vecteur = -1.0f;
+      else if(Balle_Y > (Pos_Y +8))
+        *Vecteur = 1.0f;
+      else 
+        *Vecteur = 0;
+    }
+  }
 }

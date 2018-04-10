@@ -25,12 +25,15 @@
 #define BUT_J_GAUCHE    2
 #define HIT_ROOF        3
 #define HIT_FLOOR       4
-#define BALL_NOT_TESTED 5
+#define HIT_PAD_L       5
+#define HIT_PAD_R       6
+#define BALL_NOT_TESTED 7
 
-
-
+#define PADDLE_SIZE 16
+#define PADDLE_VEC_X (-2 * (*Vec_X))
 unsigned char ucCheckCollision(unsigned char par_Pos_X, unsigned char par_Pos_Y, const unsigned char* par_Array_Bmp);
 void vNewVector(float *Balle_X, float *Balle_Y, float Mur_X, float Mur_Y);
 void vStartVector(float *Balle_X, float *Balle_Y);
-unsigned char ucCheckIsBallOK(float *X, float *Y, float *Vec_X, float *Vec_Y);
+unsigned char ucCheckIsBallOK(float *X, float *Y, float *Paddle_L, float *Paddle_R, float *P_L_Vec, float *P_R_Vec, float *Vec_X, float *Vec_Y);
+void vAI(float Balle_X, float Balle_Y, float Pos_Y, float *Vecteur, unsigned char pos, unsigned char sense);
 #endif

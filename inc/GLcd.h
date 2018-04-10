@@ -42,14 +42,15 @@ void vInitGLcd(void);
 void vClearGLcd(unsigned char ucData); 
 void vPutPixelGLcd(unsigned char ucX, unsigned char ucY);
 void vClearPixelGLcd(unsigned char ucX, unsigned char ucY);                                             
-void vDrawLineGLcd(unsigned char ucX, unsigned char ucY, unsigned char ucLong, unsigned char ucDir); 
+void vDrawLineGLcd(unsigned char ucX, unsigned char ucY, unsigned char ucLong, unsigned char ucDir);                                              
+void vRemoveLineGLcd(unsigned char ucX, unsigned char ucY, unsigned char ucLong, unsigned char ucDir); 
 void vDrawRectangleGLcd(unsigned char ucX1, unsigned char ucY1, unsigned char ucX2, unsigned char ucY2); 
 void vDrawCircleGLcd(unsigned char ucX, unsigned char ucY, unsigned char ucRayon); 
 void vRemoveCircleGLcd(unsigned char ucX, unsigned char ucY, unsigned char ucRayon);
 void vPutCharGLcd(unsigned char ucChar, unsigned char ucLigne, unsigned char ucColonne, unsigned char ucFont);
 void vPutStringGLcd(unsigned char ucTab[], char iLigneLcd, unsigned char ucFont);
 void vPutBMPGLcd(unsigned char ucTab[]); 
-
+void vPutArrayGLcd(char cArray[], int iSizeArray, int colonne, int ligne);
 
 
 #endif 

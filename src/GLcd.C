@@ -314,7 +314,24 @@ int i;
 }
 //fin routine vDrawLineGLcd----------------------------------------------------- 
 
-
+void vRemoveLineGLcd(uint8_t ucX, uint8_t ucY, uint8_t ucLong, uint8_t ucDir)
+{   
+int i;
+  if (ucDir == 'H')
+  {
+     for (i = 0; i <= ucLong; i ++)
+     {
+       vClearPixelGLcd(ucX+i, ucY); 
+     }    
+  }
+  if (ucDir == 'V')
+  {
+     for (i = 0; i <= ucLong; i ++)
+     {
+       vClearPixelGLcd(ucX, ucY+i); 
+     }
+  }                                 
+}
 //******************************vDrawRectangleGLcd******************************
 //    Nom de la fonction : vDrawRectangleGLcd
 //    Auteur : Alain Champagne                  
@@ -620,3 +637,21 @@ void vPutBMPGLcd(uint8_t ucTab[])
   }     
 }   
 //fin routine vPutBMPGLcd-------------------------------------------------------
+
+void vPutArrayGLcd(char cArray[], int iSizeArray, int colonne, int ligne)
+{
+  uint8_t i;
+  for(i=0; i<iSizeArray; i++)
+  {
+    if((colonne+i) < 20)
+      vPutCharGLcd(cArray[i], ligne, (colonne+i), 5);
+    else
+    {
+      colonne = 0;
+      if(ligne < 7)
+        ligne++;
+      else
+        ligne = 0;
+    }
+  }
+}

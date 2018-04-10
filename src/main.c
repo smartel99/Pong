@@ -88,7 +88,7 @@ static void MX_RNG_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
+uint8_t isPushed = 1;
 /* USER CODE END 0 */
 
 /**
@@ -101,9 +101,17 @@ int main(void)
   /* USER CODE BEGIN 1 */
   float fBall_Pos_X = 63;
   float fBall_Pos_Y = 32;
+  float fPaddle_L_Pos_X = 3;
+  float fPaddle_L_Pos_Y = PADDLE_DEFAULT_Y;
+  float fPaddle_R_Pos_X = 124;
+  float fPaddle_R_Pos_Y = PADDLE_DEFAULT_Y;
   
   float fBall_Vec_X = 0;
   float fBall_Vec_Y = 0;
+  float fPaddle_L_Vec_Y = 0;
+  float fPaddle_R_Vec_Y = 0;
+  float fData_Y_Offset  = 0;
+  float fData_Y = 0;
   
   uint8_t ucBall_Status = BALL_OK;
   
@@ -111,6 +119,8 @@ int main(void)
   uint8_t ucScore_Joueur_Gauche = 0;
   
   int8_t c_a_Score[9];
+  
+  
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -150,7 +160,8 @@ int main(void)
   vClearGLcd(0x00);
   
   vDrawCircleGLcd((uint8_t)fBall_Pos_X, (uint8_t) fBall_Pos_Y, 3);
-  
+  vDrawLineGLcd((uint8_t)fPaddle_L_Pos_X,(uint8_t) fPaddle_L_Pos_Y, PADDLE_SIZE, 'V');
+  vDrawLineGLcd((uint8_t)fPaddle_R_Pos_X,(uint8_t) fPaddle_R_Pos_Y, PADDLE_SIZE, 'V');
   vStartVector(&fBall_Vec_X, &fBall_Vec_Y);
   HAL_UART_Transmit(&huart2, (uint8_t*) "\n\r", 2, 100);
   /* USER CODE END 2 */
@@ -163,13 +174,42 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-    vRemoveCircleGLcd((uint8_t)fBall_Pos_X, (uint8_t)fBall_Pos_Y, 3);
+    if(isPushed)
+    {
+      isPushed = 0;
+      fData_Y_Offset = fLIS3DSHLireSortieY(LIS3DSH_Sense_8g);
+    }
     
+    vRemoveCircleGLcd((uint8_t)fBall_Pos_X, (uint8_t)fBall_Pos_Y, 3);
+    vRemoveLineGLcd((uint8_t)fPaddle_L_Pos_X, (uint8_t)fPaddle_L_Pos_Y, PADDLE_SIZE, 'V');
+    vRemoveLineGLcd((uint8_t)fPaddle_R_Pos_X, (uint8_t)fPaddle_R_Pos_Y, PADDLE_SIZE, 'V');
+    
+    fData_Y = fLIS3DSHLireSortieY(LIS3DSH_Sense_8g) - fData_Y_Offset;
+    
+//    if((fData_Y > 0.2f) || (fData_Y < -0.2f))
+//    {
+      //fPaddle_L_Vec_Y = (fData_Y * 10);
+      vAI(fBall_Pos_X, fBall_Pos_Y, fPaddle_L_Pos_Y, &fPaddle_L_Vec_Y, 50, 'G');
+      fPaddle_L_Pos_Y += fPaddle_L_Vec_Y;
+      if(fPaddle_L_Pos_Y < 0)
+        fPaddle_L_Pos_Y = 0;
+      else if(fPaddle_L_Pos_Y + PADDLE_SIZE > 63)
+        fPaddle_L_Pos_Y = 63 - PADDLE_SIZE;
+//    }
+    
+    vAI(fBall_Pos_X, fBall_Pos_Y, fPaddle_R_Pos_Y, &fPaddle_R_Vec_Y, 70, 'D');
+    
+    fPaddle_R_Pos_Y += fPaddle_R_Vec_Y;
+    if(fPaddle_R_Pos_Y < 0)
+      fPaddle_R_Pos_Y = 0;
+    else if(fPaddle_R_Pos_Y + PADDLE_SIZE > 63)
+      fPaddle_R_Pos_Y = 63 - PADDLE_SIZE;
+      
     do {
       fBall_Pos_X += fBall_Vec_X;
       fBall_Pos_Y += fBall_Vec_Y;
       
-      ucBall_Status = ucCheckIsBallOK(&fBall_Pos_X, &fBall_Pos_Y, &fBall_Vec_X, &fBall_Vec_Y);
+      ucBall_Status = ucCheckIsBallOK(&fBall_Pos_X, &fBall_Pos_Y, &fPaddle_L_Pos_Y, &fPaddle_R_Pos_Y, &fPaddle_L_Vec_Y, &fPaddle_R_Vec_Y, &fBall_Vec_X, &fBall_Vec_Y);
       if((ucBall_Status == BUT_J_DROIT) || (ucBall_Status == BUT_J_GAUCHE))
       {
         if(ucBall_Status == BUT_J_DROIT)
@@ -177,14 +217,17 @@ int main(void)
         else if(ucBall_Status == BUT_J_GAUCHE)
           ucScore_Joueur_Gauche++;
         
-        sprintf(c_a_Score, "%d %d\r", ucScore_Joueur_Droite, ucScore_Joueur_Gauche);
-        HAL_UART_Transmit(&huart2, (uint8_t*) &c_a_Score, 9, 100);
+//        sprintf(c_a_Score, "%d %d", ucScore_Joueur_Droite, ucScore_Joueur_Gauche);
+//        vPutArrayGLcd(c_a_Score, 7, 30, 0);
         HAL_Delay(1000);
       }
     } while(ucBall_Status != BALL_OK);
     ucBall_Status = BALL_NOT_TESTED;
     
     vDrawCircleGLcd((uint8_t)fBall_Pos_X, (uint8_t) fBall_Pos_Y, 3);
+    vDrawLineGLcd((uint8_t)fPaddle_L_Pos_X,(uint8_t) fPaddle_L_Pos_Y, PADDLE_SIZE, 'V');
+    vDrawLineGLcd((uint8_t)fPaddle_R_Pos_X,(uint8_t) fPaddle_R_Pos_Y, PADDLE_SIZE, 'V');
+
     HAL_Delay(35);
   }
   /* USER CODE END 3 */
